@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QDR OS | طبقة المضيفين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Reem+Kufi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1116; --bg-elev: #161a22; --bg-card: #1c2230;
+  --border: #2a3142; --accent: #d4a574; --accent-2: #e8c9a0;
+  --text: #e8eaed; --muted: #8b94a3;
+  --success: #5fb878; --danger: #e56b6f; --warning: #f0c674;
+  --info: #6eb5ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(212,165,116,0.06) 0%, transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(212,165,116,0.04) 0%, transparent 40%);
+}
+h1,h2,h3 { font-family: 'Reem Kufi', sans-serif; }
+
+/* ─── HEADER ─── */
+header {
+  border-bottom: 1px solid var(--border);
+  background: rgba(14,17,22,0.9);
+  backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 1300px; margin: 0 auto;
+  padding: 14px 28px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 10px; display: grid; place-items: center;
+  font-family: 'Reem Kufi', sans-serif; font-weight: 700; color: #0e1116; font-size: 18px;
+}
+.brand-name { font-family: 'Reem Kufi', sans-serif; font-size: 18px; font-weight: 600; }
+.brand-sub { font-size: 11px; color: var(--muted); }
+nav ul { display: flex; list-style: none; gap: 4px; flex-wrap: wrap; }
+nav a {
+  padding: 7px 13px; color: var(--muted);
+  text-decoration: none; border-radius: 8px;
+  font-size: 13px; font-weight: 500; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+nav a:hover { color: var(--text); background: var(--bg-elev); }
+nav a.active { color: var(--accent); background: rgba(212,165,116,0.1); }
+
+/* ─── LAYOUT ─── */
+.container { max-width: 1300px; margin: 0 auto; padding: 28px; }
+.page { display: none; }
+.page.active { display: block; }
+.page-head { margin-bottom: 28px; }
+.page-head h1 { font-size: 30px; font-weight: 600; margin-bottom: 5px; letter-spacing: -0.5px; }
+.page-head p { color: var(--muted); font-size: 14px; }
+.section-title {
+  font-size: 18px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+
+/* ─── STATS ─── */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.stat {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px; position: relative; overflow: hidden;
+}
+.stat::before {
+  content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(212,165,116,0.08), transparent 70%);
+}
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.stat-value { font-family: 'Reem Kufi', sans-serif; font-size: 28px; font-weight: 600; }
+.stat-trend { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.stat-trend.up { color: var(--success); }
+
+/* ─── CARDS / GRID ─── */
+.host-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.host-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px; cursor: pointer;
+  transition: all 0.25s; position: relative; overflow: hidden;
+}
+.host-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.host-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.host-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: rgba(212,165,116,0.12); display: grid; place-items: center; font-size: 20px;
+}
+.host-name { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+.host-location { font-size: 12px; color: var(--muted); }
+.host-modules { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.module-pip {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 20px; font-size: 11px;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.module-pip.on { background: rgba(95,184,120,0.12); color: var(--success); border-color: rgba(95,184,120,0.3); }
+.module-pip.off { opacity: 0.4; }
+.host-card-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px;
+}
+.status-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-left: 5px;
+}
+.status-active { background: var(--success); box-shadow: 0 0 8px rgba(95,184,120,0.6); }
+.status-inactive { background: var(--muted); }
+.status-maintenance { background: var(--warning); }
+
+.add-host-card {
+  background: var(--bg-card); border: 2px dashed var(--border);
+  border-radius: 14px; padding: 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; min-height: 200px; transition: all 0.25s; color: var(--muted);
+}
+.add-host-card:hover { border-color: var(--accent); color: var(--accent); }
+.add-host-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.6; }
+
+/* ─── TAG / BADGE ─── */
+.tag {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 500;
+}
+.tag-villa { background: rgba(212,165,116,0.12); color: var(--accent); }
+.tag-apartment { background: rgba(95,184,120,0.12); color: var(--success); }
+.tag-chalet { background: rgba(110,181,255,0.12); color: var(--info); }
+.tag-active { background: rgba(95,184,120,0.12); color: var(--success); }
+.tag-inactive { background: rgba(139,148,163,0.12); color: var(--muted); }
+.tag-maintenance { background: rgba(240,198,116,0.12); color: var(--warning); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
+  z-index: 200; align-items: flex-start; justify-content: center;
+  padding: 30px 16px; overflow-y: auto;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: 16px; max-width: 780px; width: 100%; padding: 28px; margin: auto;
+}
+.modal-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.modal-head h2 { font-size: 20px; margin-bottom: 4px; }
+.modal-head p { color: var(--muted); font-size: 12.5px; }
+.close-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px;
+}
+.close-btn:hover { color: var(--text); border-color: var(--accent); }
+
+/* TABS */
+.tab-bar {
+  display: flex; gap: 4px;
+  background: var(--bg-card); padding: 4px; border-radius: 10px;
+  margin-bottom: 22px;
+}
+.tab-btn {
+  flex: 1; padding: 9px; text-align: center; border-radius: 8px;
+  cursor: pointer; font-size: 13px; color: var(--muted);
+  transition: all 0.2s; font-weight: 500; background: transparent; border: none;
+  font-family: 'Tajawal', sans-serif;
+}
+.tab-btn.active { background: var(--accent); color: #0e1116; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group.full { grid-column: 1 / -1; }
+label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+input, select, textarea {
+  width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text); padding: 10px 13px; border-radius: 9px;
+  font-family: 'Tajawal', sans-serif; font-size: 13.5px; transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+textarea { resize: vertical; min-height: 70px; }
+.form-actions {
+  display: flex; gap: 10px; margin-top: 22px; padding-top: 18px;
+  border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+button.primary, button.secondary, button.danger {
+  padding: 10px 20px; border-radius: 9px;
+  font-family: 'Tajawal', sans-serif; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s;
+}
+button.primary { background: var(--accent); color: #0e1116; }
+button.primary:hover { background: var(--accent-2); }
+button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+button.secondary:hover { border-color: var(--accent); }
+button.danger { background: transparent; color: var(--danger); border: 1px solid rgba(229,107,111,0.3); }
+button.danger:hover { background: rgba(229,107,111,0.1); }
+
+/* ─── MODULE TOGGLES ─── */
+.modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.module-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; transition: all 0.2s;
+}
+.module-card.active { border-color: rgba(95,184,120,0.4); background: rgba(95,184,120,0.04); }
+.module-card-head {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.module-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.module-icon { font-size: 20px; }
+
+/* Toggle Switch */
+.toggle { position: relative; display: inline-block; width: 42px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--border); border-radius: 24px; transition: 0.3s;
+}
+.slider::before {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; right: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: 0.3s;
+}
+input:checked + .slider { background: var(--success); }
+input:checked + .slider::before { transform: translateX(-18px); }
+
+.module-options { display: grid; gap: 8px; }
+.module-option { display: flex; flex-direction: column; gap: 4px; }
+.module-option label { font-size: 12px; margin-bottom: 2px; }
+.mini-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.mini-chip {
+  padding: 3px 9px; border: 1px solid var(--border);
+  border-radius: 20px; font-size: 11px; cursor: pointer;
+  color: var(--muted); transition: all 0.2s; background: var(--bg-elev);
+}
+.mini-chip.selected { background: rgba(212,165,116,0.15); color: var(--accent); border-color: var(--accent); }
+
+/* ─── AUTOMATIONS ─── */
+.automation-list { display: grid; gap: 10px; }
+.auto-row {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.auto-event {
+  background: rgba(110,181,255,0.12); color: var(--info);
+  border: 1px solid rgba(110,181,255,0.25);
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  white-space: nowrap;
+}
+.auto-arrow { color: var(--muted); font-size: 18px; }
+.auto-actions { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.auto-action {
+  background: rgba(212,165,116,0.1); color: var(--accent);
+  border: 1px solid rgba(212,165,116,0.25);
+  padding: 3px 10px; border-radius: 6px; font-size: 11.5px;
+}
+.auto-toggle { margin-right: auto; }
+
+/* ─── LAYER ARCHITECTURE ─── */
+.layer-flow { margin-bottom: 40px; }
+.layer-row { display: flex; align-items: stretch; gap: 0; margin-bottom: 0; overflow-x: auto; }
+.layer-node {
+  flex: 1; min-width: 140px; padding: 18px 16px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  text-align: center; position: relative;
+}
+.layer-node:first-child { border-radius: 14px 0 0 14px; }
+.layer-node:last-child { border-radius: 0 14px 14px 0; }
+.layer-node + .layer-node { border-right: none; }
+.layer-node.highlight { border-color: rgba(212,165,116,0.5); background: rgba(212,165,116,0.06); }
+.layer-node-icon { font-size: 26px; margin-bottom: 8px; }
+.layer-node-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; font-family: 'Reem Kufi', sans-serif; }
+.layer-node-desc { font-size: 10.5px; color: var(--muted); line-height: 1.5; }
+.layer-arrow-row { display: flex; justify-content: center; align-items: center; margin: 10px 0; gap: 0; }
+.layer-arrow { flex: 1; min-width: 140px; display: flex; justify-content: center; align-items: center; color: var(--muted); font-size: 20px; }
+
+.event-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
+.event-pill {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: 1px solid; cursor: pointer; transition: all 0.2s;
+}
+.event-pill:hover { transform: translateY(-2px); }
+.e-booking { background: rgba(110,181,255,0.1); color: var(--info); border-color: rgba(110,181,255,0.3); }
+.e-checkin { background: rgba(95,184,120,0.1); color: var(--success); border-color: rgba(95,184,120,0.3); }
+.e-guest { background: rgba(212,165,116,0.1); color: var(--accent); border-color: rgba(212,165,116,0.3); }
+.e-checkout { background: rgba(240,198,116,0.1); color: var(--warning); border-color: rgba(240,198,116,0.3); }
+.e-empty { background: rgba(139,148,163,0.1); color: var(--muted); border-color: rgba(139,148,163,0.3); }
+.e-cleaning { background: rgba(229,107,111,0.1); color: var(--danger); border-color: rgba(229,107,111,0.3); }
+
+.arch-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.arch-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px;
+}
+.arch-card-icon { font-size: 28px; margin-bottom: 10px; }
+.arch-card h3 { font-size: 15px; margin-bottom: 6px; }
+.arch-card p { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.arch-card ul { margin-top: 8px; padding-right: 16px; }
+.arch-card li { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+
+/* ─── EVENT BUS MONITOR ─── */
+.event-monitor {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 28px;
+}
+.event-monitor-head {
+  padding: 14px 18px; background: var(--bg-elev); border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success); display: inline-block;
+  box-shadow: 0 0 8px rgba(95,184,120,0.8); margin-left: 8px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.event-log { padding: 14px; display: grid; gap: 6px; min-height: 200px; max-height: 320px; overflow-y: auto; }
+.event-log-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px; border-radius: 8px;
+  background: var(--bg-elev); font-size: 12.5px;
+  border-right: 3px solid var(--border);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.event-log-item.e-booking { border-right-color: var(--info); }
+.event-log-item.e-checkin { border-right-color: var(--success); }
+.event-log-item.e-guest { border-right-color: var(--accent); }
+.event-log-item.e-checkout { border-right-color: var(--warning); }
+.event-log-item.e-empty { border-right-color: var(--muted); }
+.event-log-item.e-cleaning { border-right-color: var(--danger); }
+.log-time { color: var(--muted); font-size: 11px; white-space: nowrap; font-family: monospace; }
+.log-type { font-weight: 700; font-size: 11px; }
+.log-host { color: var(--muted); font-size: 11.5px; }
+.log-desc { flex: 1; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 30px; right: 30px;
+  background: var(--bg-elev); border: 1px solid var(--success);
+  border-right: 4px solid var(--success); padding: 14px 22px;
+  border-radius: 10px; font-size: 13.5px; z-index: 300;
+  display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); direction: rtl;
+}
+.toast.show { display: block; }
+.toast.error { border-color: var(--danger); border-right-color: var(--danger); }
+
+/* ─── EMPTY STATE ─── */
+.empty { padding: 50px 20px; text-align: center; color: var(--muted); }
+.empty-icon { font-size: 44px; margin-bottom: 10px; opacity: 0.35; }
+.empty h3 { font-size: 16px; margin-bottom: 6px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .arch-cards { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .modules-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .arch-cards { grid-template-columns: 1fr; }
+  .container { padding: 16px; }
+  .header-inner { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo">Q</div>
+      <div>
+        <div class="brand-name">QDR OS</div>
+        <div class="brand-sub">Host Layer · طبقة المضيفين</div>
+      </div>
+    </div>
+    <nav>
+      <ul>
+        <li><a onclick="switchPage('layer')" id="nav-layer" class="active">🏗️ البنية</a></li>
+        <li><a onclick="switchPage('hosts')" id="nav-hosts">🏠 المضيفون</a></li>
+        <li><a onclick="switchPage('events')" id="nav-events">⚡ الأحداث</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════
+       PAGE: LAYER ARCHITECTURE
+  ══════════════════════════════════════ -->
+  <div class="page active" id="page-layer">
+    <div class="page-head">
+      <h1>بنية النظام</h1>
+      <p>كيف تتدفق المعلومات من الأجهزة وحتى تجربة الضيف — كل طبقة مستقلة وقابلة للتطوير</p>
+    </div>
+
+    <!-- Flow -->
+    <h2 class="section-title">تدفق الطبقات</h2>
+    <div class="layer-flow">
+      <div class="layer-row">
+        <div class="layer-node">
+          <div class="layer-node-icon">🔌</div>
+          <div class="layer-node-title">Device Layer</div>
+          <div class="layer-node-desc">Zigbee2MQTT<br>حساسات · أجهزة ذكية</div>
+        </div>
+        <div class="layer-node">
+          <div class="layer-node-icon">📡</div>
+          <div class="layer-node-title">Local Agent</div>
+          <div class="layer-node-desc">QLVIN Agent<br>يجمع الأحداث محلياً</div>
+        </div>
+        <div class="layer-node highlight">
+          <div class="layer-node-icon">⚡</div>
+          <div class="layer-node-title">Event Bus</div>
+          <div class="layer-node-desc">الأحداث تتدفق هنا<br>6 أحداث رئيسية</div>
+        </div>
+        <div class="layer-node">
+          <div class="layer-node-icon">🧠</div>
+          <div class="layer-node-title">State Engine</div>
+          <div class="layer-node-desc">حالة العقار<br>والضيف والأجهزة</div>
+        </div>
+        <div class="layer-node">
+          <div class="layer-node-icon">🔗</div>
+          <div class="layer-node-title">Automation Graph</div>
+          <div class="layer-node-desc">متى يحصل إيش<br>لكل مضيف بشكل مستقل</div>
+        </div>
+        <div class="layer-node">
+          <div class="layer-node-icon">🤖</div>
+          <div class="layer-node-title">AI Layer</div>
+          <div class="layer-node-desc">تخصيص التجربة<br>تعلم تفضيلات الضيف</div>
+        </div>
+        <div class="layer-node highlight">
+          <div class="layer-node-icon">✨</div>
+          <div class="layer-node-title">Experience</div>
+          <div class="layer-node-desc">ما يشوفه الضيف<br>ويحسه في العقار</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Bus pills -->
+    <h2 class="section-title">أحداث Event Bus</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">كل حدث يُطلق سلسلة أتمتة مختلفة لكل مضيف حسب إعداداته</p>
+    <div class="event-pills">
+      <div class="event-pill e-booking" onclick="fireEvent('BOOKING_CREATED')">📅 BOOKING_CREATED</div>
+      <div class="event-pill e-checkin" onclick="fireEvent('CHECKIN_STARTED')">🔑 CHECKIN_STARTED</div>
+      <div class="event-pill e-guest" onclick="fireEvent('GUEST_ENTERED')">🚶 GUEST_ENTERED</div>
+      <div class="event-pill e-checkout" onclick="fireEvent('CHECKOUT_SOON')">⏰ CHECKOUT_SOON</div>
+      <div class="event-pill e-empty" onclick="fireEvent('PROPERTY_EMPTY')">🏚️ PROPERTY_EMPTY</div>
+      <div class="event-pill e-cleaning" onclick="fireEvent('CLEANING_REQUIRED')">🧹 CLEANING_REQUIRED</div>
+    </div>
+    <p style="color:var(--muted);font-size:11.5px;text-align:center;margin-bottom:32px;">اضغط على أي حدث لمحاكاته في Event Bus →</p>
+
+    <!-- Architecture cards -->
+    <h2 class="section-title">مبادئ التصميم</h2>
+    <div class="arch-cards">
+      <div class="arch-card">
+        <div class="arch-card-icon">🧩</div>
+        <h3>Plug and Play</h3>
+        <p>كل مضيف يُضاف من الداشبورد بضغطة زر. لا تغيير في الكود. كل شيء يشتغل تلقائياً من اللحظة الأولى.</p>
+        <ul>
+          <li>نموذج واحد لإضافة أي مضيف</li>
+          <li>إعدادات افتراضية ذكية</li>
+          <li>تفعيل فوري بدون إعادة تشغيل</li>
+        </ul>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🔧</div>
+        <h3>Feature Modules</h3>
+        <p>كل ميزة معزولة في module مستقل. تفعّله أو توقفه لأي مضيف دون أن يأثر على الباقين.</p>
+        <ul>
+          <li>🏆 Sports: دوري السعودية، أوروبا، إلخ</li>
+          <li>🎵 Music: النوع، التوقيت</li>
+          <li>💡 Lighting: مشاهد، تعتيم تلقائي</li>
+          <li>🤖 AI: شخصية، لغة، تفضيلات</li>
+        </ul>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">⚙️</div>
+        <h3>Per-Host Config</h3>
+        <p>مضيف A يريد مباريات دوري السعودية فقط وموسيقى عربية. مضيف B لا يريد رياضة أصلاً. كل واحد مستقل تماماً.</p>
+        <ul>
+          <li>JSON config لكل مضيف</li>
+          <li>يُحفظ في Supabase</li>
+          <li>يُحمّل عند أي حدث</li>
+        </ul>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">📊</div>
+        <h3>Supabase Backend</h3>
+        <p>Auth · Database · Realtime · Storage كلهم جاهزين. ما تحتاج تبني backend من الصفر.</p>
+        <ul>
+          <li>hosts table</li>
+          <li>events table (logs)</li>
+          <li>automations table</li>
+        </ul>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🔄</div>
+        <h3>Automation Graph</h3>
+        <p>كل حدث → قائمة أتمتة. كل مضيف يحدد أي أتمتة تشتغل عنده. التعديل من الداشبورد مباشرة.</p>
+        <ul>
+          <li>CHECKIN_STARTED → welcome routine</li>
+          <li>PROPERTY_EMPTY → reset all</li>
+          <li>CHECKOUT_SOON → reminders</li>
+        </ul>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-icon">🌐</div>
+        <h3>Booking Sources</h3>
+        <p>Airbnb · Booking.com · مباشر. كل مصدر يُرسل BOOKING_CREATED للـ Event Bus والنظام يكمل وحده.</p>
+        <ul>
+          <li>Webhook لكل مصدر</li>
+          <li>توحيد البيانات</li>
+          <li>State Engine يتحدث تلقائياً</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Supabase schema hint -->
+    <h2 class="section-title">مخطط قاعدة البيانات</h2>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;font-family:monospace;font-size:12.5px;color:var(--muted);line-height:2;overflow-x:auto;">
+      <span style="color:var(--accent);">hosts</span> (id, name, location, type, status, <span style="color:var(--info);">config JSON</span>, created_at)<br>
+      <span style="color:var(--accent);">events_log</span> (id, host_id, event_type, payload JSON, triggered_at)<br>
+      <span style="color:var(--accent);">automations</span> (id, host_id, trigger_event, actions JSON, is_active)<br>
+      <span style="color:var(--accent);">devices</span> (id, host_id, device_type, zigbee_id, last_seen)<br>
+      <span style="color:var(--accent);">bookings</span> (id, host_id, source, guest_name, checkin, checkout, status)
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PAGE: HOSTS
+  ══════════════════════════════════════ -->
+  <div class="page" id="page-hosts">
+    <div class="page-head">
+      <h1>المضيفون</h1>
+      <p>سجل المضيفين — أضف مضيف جديد وهيّئ modules بضغطة زر</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">إجمالي المضيفين</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-trend">مسجلون في النظام</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">نشط</div>
+        <div class="stat-value" id="stat-active">0</div>
+        <div class="stat-trend up">يعمل الآن</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">الـ Modules المفعّلة</div>
+        <div class="stat-value" id="stat-modules">0</div>
+        <div class="stat-trend">عبر كل المضيفين</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">أحداث اليوم</div>
+        <div class="stat-value" id="stat-events">0</div>
+        <div class="stat-trend">في Event Bus</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">سجل المضيفين</h2>
+    <div class="host-grid" id="host-grid">
+      <!-- hosts rendered here -->
+      <div class="add-host-card" onclick="openAddHost()">
+        <div class="add-host-icon">＋</div>
+        <div style="font-size:14px;font-weight:600;">إضافة مضيف جديد</div>
+        <div style="font-size:12px;margin-top:4px;">Plug and Play — يشتغل فوراً</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PAGE: EVENTS
+  ══════════════════════════════════════ -->
+  <div class="page" id="page-events">
+    <div class="page-head">
+      <h1>Event Bus</h1>
+      <p>مراقبة الأحداث في الوقت الحقيقي — كل حدث يطلق سلسلة أتمتة</p>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <div class="event-pill e-booking" onclick="fireEvent('BOOKING_CREATED')" style="cursor:pointer;">📅 BOOKING_CREATED</div>
+      <div class="event-pill e-checkin" onclick="fireEvent('CHECKIN_STARTED')" style="cursor:pointer;">🔑 CHECKIN_STARTED</div>
+      <div class="event-pill e-guest" onclick="fireEvent('GUEST_ENTERED')" style="cursor:pointer;">🚶 GUEST_ENTERED</div>
+      <div class="event-pill e-checkout" onclick="fireEvent('CHECKOUT_SOON')" style="cursor:pointer;">⏰ CHECKOUT_SOON</div>
+      <div class="event-pill e-empty" onclick="fireEvent('PROPERTY_EMPTY')" style="cursor:pointer;">🏚️ PROPERTY_EMPTY</div>
+      <div class="event-pill e-cleaning" onclick="fireEvent('CLEANING_REQUIRED')" style="cursor:pointer;">🧹 CLEANING_REQUIRED</div>
+      <button class="secondary" onclick="clearEventLog()" style="margin-right:auto;font-size:12px;padding:6px 14px;border-radius:20px;">مسح</button>
+    </div>
+
+    <div class="event-monitor">
+      <div class="event-monitor-head">
+        <div style="font-size:14px;font-weight:600;display:flex;align-items:center;">
+          <span class="live-dot"></span> Event Bus Monitor
+        </div>
+        <div style="font-size:12px;color:var(--muted);" id="event-count-label">0 حدث</div>
+      </div>
+      <div class="event-log" id="event-log">
+        <div class="empty" style="padding:30px 20px;">
+          <div class="empty-icon">📡</div>
+          <div>اضغط على أي حدث أعلاه لمحاكاته</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Automation results -->
+    <h2 class="section-title">نتائج الأتمتة</h2>
+    <div id="auto-results">
+      <div class="empty">
+        <div class="empty-icon">🔗</div>
+        <div>عند تشغيل حدث ستظهر هنا الأتمتة التي تُفعّل لكل مضيف</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL: ADD HOST
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-add-host">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2>إضافة مضيف جديد</h2>
+        <p>Plug and Play — يشتغل من اللحظة الأولى بإعدادات افتراضية ذكية</p>
+      </div>
+      <button class="close-btn" onclick="closeModal('add-host')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div>
+        <label>اسم العقار / المضيف</label>
+        <input type="text" id="h-name" placeholder="مثال: فيلا الياسمين">
+      </div>
+      <div>
+        <label>الموقع</label>
+        <input type="text" id="h-location" placeholder="مثال: الرياض - النزهة">
+      </div>
+      <div>
+        <label>نوع العقار</label>
+        <select id="h-type">
+          <option value="villa">فيلا 🏡</option>
+          <option value="apartment">شقة 🏢</option>
+          <option value="chalet">شاليه 🏕️</option>
+        </select>
+      </div>
+      <div>
+        <label>الحالة</label>
+        <select id="h-status">
+          <option value="active">نشط ✅</option>
+          <option value="inactive">غير نشط</option>
+          <option value="maintenance">صيانة 🔧</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>رسالة ترحيب مخصصة</label>
+        <input type="text" id="h-welcome" placeholder="مثال: أهلاً وسهلاً في فيلتنا المميزة">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="primary" onclick="saveHost()">إضافة المضيف</button>
+      <button class="secondary" onclick="closeModal('add-host')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL: CONFIG HOST
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-config-host">
+  <div class="modal" style="max-width:820px;">
+    <div class="modal-head">
+      <div>
+        <h2 id="config-host-name">إعدادات المضيف</h2>
+        <p id="config-host-sub">هيّئ الـ modules والأتمتة لهذا المضيف</p>
+      </div>
+      <button class="close-btn" onclick="closeModal('config-host')">✕</button>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-info-btn" onclick="switchTab('info')">المعلومات</button>
+      <button class="tab-btn" id="tab-modules-btn" onclick="switchTab('modules')">الـ Modules</button>
+      <button class="tab-btn" id="tab-auto-btn" onclick="switchTab('auto')">الأتمتة</button>
+    </div>
+
+    <!-- Tab: Info -->
+    <div id="tab-info" class="tab-content">
+      <div class="form-grid">
+        <div>
+          <label>الاسم</label>
+          <input type="text" id="cfg-name">
+        </div>
+        <div>
+          <label>الموقع</label>
+          <input type="text" id="cfg-location">
+        </div>
+        <div>
+          <label>النوع</label>
+          <select id="cfg-type">
+            <option value="villa">فيلا</option>
+            <option value="apartment">شقة</option>
+            <option value="chalet">شاليه</option>
+          </select>
+        </div>
+        <div>
+          <label>الحالة</label>
+          <select id="cfg-status">
+            <option value="active">نشط</option>
+            <option value="inactive">غير نشط</option>
+            <option value="maintenance">صيانة</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>رسالة ترحيب</label>
+          <input type="text" id="cfg-welcome">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Modules -->
+    <div id="tab-modules" class="tab-content" style="display:none;">
+      <div class="modules-grid" id="modules-grid">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Tab: Automations -->
+    <div id="tab-auto" class="tab-content" style="display:none;">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">كل حدث في الـ Event Bus يُطلق الأتمتة التالية لهذا المضيف. فعّل أو وقف كل أتمتة بشكل مستقل.</p>
+      <div class="automation-list" id="auto-list">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="primary" onclick="saveHostConfig()">حفظ الإعدادات</button>
+      <button class="danger" onclick="deleteHost()">حذف المضيف</button>
+      <button class="secondary" onclick="closeModal('config-host')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA MODEL ───────────────────────────────────────────────
+const LEAGUES = [
+  { id: 'saudi', label: 'دوري روشن' },
+  { id: 'premier', label: 'الدوري الإنجليزي' },
+  { id: 'champions', label: 'Champions League' },
+  { id: 'laliga', label: 'La Liga' },
+  { id: 'bundesliga', label: 'Bundesliga' },
+];
+
+const MUSIC_GENRES = [
+  { id: 'arabic', label: 'عربي' },
+  { id: 'khaliji', label: 'خليجي' },
+  { id: 'lounge', label: 'Lounge' },
+  { id: 'classical', label: 'كلاسيك' },
+  { id: 'quran', label: 'قرآن' },
+];
+
+const EVENTS_META = {
+  BOOKING_CREATED:  { cls: 'e-booking',  icon: '📅', label: 'حجز جديد' },
+  CHECKIN_STARTED:  { cls: 'e-checkin',  icon: '🔑', label: 'بدء تسجيل وصول' },
+  GUEST_ENTERED:    { cls: 'e-guest',    icon: '🚶', label: 'الضيف دخل العقار' },
+  CHECKOUT_SOON:    { cls: 'e-checkout', icon: '⏰', label: 'اقتراب موعد المغادرة' },
+  PROPERTY_EMPTY:   { cls: 'e-empty',    icon: '🏚️', label: 'العقار فارغ' },
+  CLEANING_REQUIRED:{ cls: 'e-cleaning', icon: '🧹', label: 'مطلوب تنظيف' },
+};
+
+const DEFAULT_AUTOMATIONS = {
+  BOOKING_CREATED:  { active: true,  actions: ['إرسال رسالة ترحيب', 'تحديث State Engine'] },
+  CHECKIN_STARTED:  { active: true,  actions: ['تشغيل موسيقى ترحيب', 'إضاءة دافئة', 'عرض رسالة الترحيب'] },
+  GUEST_ENTERED:    { active: true,  actions: ['تفعيل Presence Detection', 'تشغيل Sports لو مباراة'] },
+  CHECKOUT_SOON:    { active: true,  actions: ['تذكير الضيف', 'تعتيم الإضاءة تدريجياً'] },
+  PROPERTY_EMPTY:   { active: true,  actions: ['إعادة ضبط كل الأجهزة', 'إشعار فريق النظافة'] },
+  CLEANING_REQUIRED:{ active: true,  actions: ['إشعار المضيف', 'تحديث حالة العقار'] },
+};
+
+function makeDefaultHost(name, location, type, status, welcomeMsg) {
+  return {
+    id: 'h_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    name: name || 'مضيف جديد',
+    location: location || '',
+    type: type || 'villa',
+    status: status || 'active',
+    welcomeMsg: welcomeMsg || 'أهلاً وسهلاً',
+    modules: {
+      sports: { enabled: true,  leagues: ['saudi'], match_day_only: false },
+      music:  { enabled: true,  genre: 'arabic',   auto_on: true },
+      lighting:{ enabled: true, scene: 'warm',      auto_dim: true },
+      tv:     { enabled: false, default_ch: 'SSC' },
+      presence:{ enabled: true, sensitivity: 'medium' },
+      ai:     { enabled: true,  personality: 'friendly' },
+    },
+    automations: JSON.parse(JSON.stringify(DEFAULT_AUTOMATIONS)),
+    created: new Date().toLocaleDateString('ar-SA'),
+  };
+}
+
+// ─── STORAGE ─────────────────────────────────────────────────
+let hosts = [];
+let eventLog = [];
+let todayEventCount = 0;
+let editingHostId = null;
+
+function loadData() {
+  try { hosts = JSON.parse(localStorage.getItem('qdros_hosts') || '[]'); } catch { hosts = []; }
+  try { eventLog = JSON.parse(localStorage.getItem('qdros_events') || '[]'); } catch { eventLog = []; }
+  todayEventCount = parseInt(localStorage.getItem('qdros_today_events') || '0');
+}
+
+function saveData() {
+  localStorage.setItem('qdros_hosts', JSON.stringify(hosts));
+  localStorage.setItem('qdros_events', JSON.stringify(eventLog.slice(-100)));
+  localStorage.setItem('qdros_today_events', todayEventCount.toString());
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  if (page === 'hosts') renderHosts();
+  if (page === 'events') renderEventLog();
+}
+
+function switchTab(tab) {
+  ['info','modules','auto'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t + '-btn').classList.toggle('active', t === tab);
+  });
+  if (tab === 'modules' && editingHostId) renderModulesGrid();
+  if (tab === 'auto' && editingHostId) renderAutoList();
+}
+
+// ─── HOST CRUD ────────────────────────────────────────────────
+function openAddHost() {
+  ['h-name','h-location','h-welcome'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('h-type').value = 'villa';
+  document.getElementById('h-status').value = 'active';
+  openModal('add-host');
+}
+
+function saveHost() {
+  const name = document.getElementById('h-name').value.trim();
+  if (!name) { showToast('الرجاء إدخال اسم المضيف', true); return; }
+  const host = makeDefaultHost(
+    name,
+    document.getElementById('h-location').value.trim(),
+    document.getElementById('h-type').value,
+    document.getElementById('h-status').value,
+    document.getElementById('h-welcome').value.trim()
+  );
+  hosts.push(host);
+  saveData();
+  closeModal('add-host');
+  renderHosts();
+  updateStats();
+  showToast('تم إضافة المضيف بنجاح ✅');
+}
+
+function openConfigHost(id) {
+  const host = hosts.find(h => h.id === id);
+  if (!host) return;
+  editingHostId = id;
+  document.getElementById('config-host-name').textContent = host.name;
+  document.getElementById('config-host-sub').textContent = host.location + ' · ' + typeLabel(host.type);
+  document.getElementById('cfg-name').value = host.name;
+  document.getElementById('cfg-location').value = host.location;
+  document.getElementById('cfg-type').value = host.type;
+  document.getElementById('cfg-status').value = host.status;
+  document.getElementById('cfg-welcome').value = host.welcomeMsg || '';
+  switchTab('info');
+  openModal('config-host');
+}
+
+function saveHostConfig() {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  host.name = document.getElementById('cfg-name').value.trim() || host.name;
+  host.location = document.getElementById('cfg-location').value.trim();
+  host.type = document.getElementById('cfg-type').value;
+  host.status = document.getElementById('cfg-status').value;
+  host.welcomeMsg = document.getElementById('cfg-welcome').value.trim();
+  saveData();
+  renderHosts();
+  updateStats();
+  closeModal('config-host');
+  showToast('تم حفظ الإعدادات ✅');
+}
+
+function deleteHost() {
+  if (!confirm('هل تريد حذف هذا المضيف؟')) return;
+  hosts = hosts.filter(h => h.id !== editingHostId);
+  saveData();
+  renderHosts();
+  updateStats();
+  closeModal('config-host');
+  showToast('تم الحذف');
+}
+
+// ─── RENDER HOSTS ─────────────────────────────────────────────
+function typeLabel(t) { return { villa:'فيلا', apartment:'شقة', chalet:'شاليه' }[t] || t; }
+function typeIcon(t) { return { villa:'🏡', apartment:'🏢', chalet:'🏕️' }[t] || '🏠'; }
+function statusLabel(s) { return { active:'نشط', inactive:'غير نشط', maintenance:'صيانة' }[s] || s; }
+function statusDotClass(s) { return { active:'status-active', inactive:'status-inactive', maintenance:'status-maintenance' }[s] || ''; }
+
+function modulesSummary(host) {
+  const map = {
+    sports: '🏆', music: '🎵', lighting: '💡',
+    tv: '📺', presence: '📡', ai: '🤖'
+  };
+  return Object.entries(map).map(([key, icon]) => {
+    const mod = host.modules[key];
+    const on = mod && mod.enabled;
+    return `<div class="module-pip ${on ? 'on' : 'off'}">${icon} ${key}</div>`;
+  }).join('');
+}
+
+function renderHosts() {
+  const grid = document.getElementById('host-grid');
+  let html = hosts.map(host => `
+    <div class="host-card" onclick="openConfigHost('${host.id}')">
+      <div class="host-card-head">
+        <div style="flex:1;">
+          <div class="host-name">${host.name}</div>
+          <div class="host-location">${host.location}</div>
+        </div>
+        <div class="host-icon">${typeIcon(host.type)}</div>
+      </div>
+      <div class="host-modules">${modulesSummary(host)}</div>
+      <div class="host-card-footer">
+        <div>
+          <span class="status-dot ${statusDotClass(host.status)}"></span>
+          ${statusLabel(host.status)}
+        </div>
+        <span class="tag tag-${host.type}">${typeLabel(host.type)}</span>
+        <span style="color:var(--muted);font-size:11px;">${host.created}</span>
+      </div>
+    </div>
+  `).join('');
+  html += `
+    <div class="add-host-card" onclick="openAddHost()">
+      <div class="add-host-icon">＋</div>
+      <div style="font-size:14px;font-weight:600;">إضافة مضيف جديد</div>
+      <div style="font-size:12px;margin-top:4px;">Plug and Play</div>
+    </div>
+  `;
+  grid.innerHTML = html;
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = hosts.length;
+  document.getElementById('stat-active').textContent = hosts.filter(h => h.status === 'active').length;
+  const totalModules = hosts.reduce((acc, h) =>
+    acc + Object.values(h.modules).filter(m => m.enabled).length, 0);
+  document.getElementById('stat-modules').textContent = totalModules;
+  document.getElementById('stat-events').textContent = todayEventCount;
+}
+
+// ─── MODULES GRID ─────────────────────────────────────────────
+function renderModulesGrid() {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+
+  const defs = [
+    {
+      key: 'sports', icon: '🏆', label: 'Sports',
+      extra: () => `
+        <div class="module-option">
+          <label>الدوريات</label>
+          <div class="mini-chips" id="leagues-chips">
+            ${LEAGUES.map(l => `
+              <div class="mini-chip ${(host.modules.sports.leagues||[]).includes(l.id) ? 'selected' : ''}"
+                   onclick="toggleLeague('${l.id}', this)">${l.label}</div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="module-option" style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <label style="margin:0;flex:1;">أيام المباريات فقط</label>
+          <label class="toggle">
+            <input type="checkbox" id="sports-match-only" ${host.modules.sports.match_day_only ? 'checked' : ''}
+              onchange="toggleModuleOption('sports','match_day_only',this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      `
+    },
+    {
+      key: 'music', icon: '🎵', label: 'Music',
+      extra: () => `
+        <div class="module-option">
+          <label>النوع الموسيقي</label>
+          <div class="mini-chips">
+            ${MUSIC_GENRES.map(g => `
+              <div class="mini-chip ${host.modules.music.genre === g.id ? 'selected' : ''}"
+                   onclick="selectMusicGenre('${g.id}', this)">${g.label}</div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="module-option" style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <label style="margin:0;flex:1;">تشغيل تلقائي</label>
+          <label class="toggle">
+            <input type="checkbox" id="music-auto" ${host.modules.music.auto_on ? 'checked' : ''}
+              onchange="toggleModuleOption('music','auto_on',this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      `
+    },
+    {
+      key: 'lighting', icon: '💡', label: 'Lighting',
+      extra: () => `
+        <div class="module-option">
+          <label>مشهد الاستقبال</label>
+          <div class="mini-chips">
+            ${['warm','cool','bright','dim'].map(s => `
+              <div class="mini-chip ${host.modules.lighting.scene === s ? 'selected' : ''}"
+                   onclick="selectScene('${s}', this)">${{warm:'دافئ',cool:'بارد',bright:'ساطع',dim:'خافت'}[s]}</div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="module-option" style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <label style="margin:0;flex:1;">تعتيم تلقائي ليلاً</label>
+          <label class="toggle">
+            <input type="checkbox" ${host.modules.lighting.auto_dim ? 'checked' : ''}
+              onchange="toggleModuleOption('lighting','auto_dim',this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      `
+    },
+    {
+      key: 'tv', icon: '📺', label: 'Smart TV',
+      extra: () => `
+        <div class="module-option">
+          <label>القناة الافتراضية</label>
+          <input type="text" value="${host.modules.tv.default_ch || 'SSC'}"
+            onchange="setModuleVal('tv','default_ch',this.value)"
+            style="font-size:12px;padding:7px 10px;">
+        </div>
+      `
+    },
+    {
+      key: 'presence', icon: '📡', label: 'Presence',
+      extra: () => `
+        <div class="module-option">
+          <label>الحساسية</label>
+          <div class="mini-chips">
+            ${['low','medium','high'].map(s => `
+              <div class="mini-chip ${host.modules.presence.sensitivity === s ? 'selected' : ''}"
+                   onclick="selectSensitivity('${s}', this)">${{low:'منخفض',medium:'متوسط',high:'عالي'}[s]}</div>
+            `).join('')}
+          </div>
+        </div>
+      `
+    },
+    {
+      key: 'ai', icon: '🤖', label: 'AI Layer',
+      extra: () => `
+        <div class="module-option">
+          <label>شخصية المساعد</label>
+          <div class="mini-chips">
+            ${['friendly','professional','minimal'].map(p => `
+              <div class="mini-chip ${host.modules.ai.personality === p ? 'selected' : ''}"
+                   onclick="selectPersonality('${p}', this)">${{friendly:'ودّي',professional:'احترافي',minimal:'بسيط'}[p]}</div>
+            `).join('')}
+          </div>
+        </div>
+      `
+    },
+  ];
+
+  document.getElementById('modules-grid').innerHTML = defs.map(def => {
+    const mod = host.modules[def.key];
+    const on = mod && mod.enabled;
+    return `
+      <div class="module-card ${on ? 'active' : ''}" id="mod-card-${def.key}">
+        <div class="module-card-head">
+          <div class="module-label">
+            <span class="module-icon">${def.icon}</span>
+            ${def.label}
+          </div>
+          <label class="toggle">
+            <input type="checkbox" ${on ? 'checked' : ''}
+              onchange="toggleModule('${def.key}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="module-options" style="${on ? '' : 'opacity:0.4;pointer-events:none;'}">
+          ${def.extra()}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleModule(key, val) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  host.modules[key].enabled = val;
+  const card = document.getElementById('mod-card-' + key);
+  if (card) {
+    card.classList.toggle('active', val);
+    const opts = card.querySelector('.module-options');
+    if (opts) opts.style.cssText = val ? '' : 'opacity:0.4;pointer-events:none;';
+  }
+  saveData();
+}
+
+function toggleModuleOption(mod, key, val) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (host) { host.modules[mod][key] = val; saveData(); }
+}
+function setModuleVal(mod, key, val) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (host) { host.modules[mod][key] = val; saveData(); }
+}
+
+function toggleLeague(id, el) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  const leagues = host.modules.sports.leagues || [];
+  const idx = leagues.indexOf(id);
+  if (idx >= 0) leagues.splice(idx, 1); else leagues.push(id);
+  host.modules.sports.leagues = leagues;
+  el.classList.toggle('selected', leagues.includes(id));
+  saveData();
+}
+
+function selectMusicGenre(id, el) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  host.modules.music.genre = id;
+  el.closest('.mini-chips').querySelectorAll('.mini-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  saveData();
+}
+
+function selectScene(id, el) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  host.modules.lighting.scene = id;
+  el.closest('.mini-chips').querySelectorAll('.mini-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  saveData();
+}
+
+function selectSensitivity(id, el) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  host.modules.presence.sensitivity = id;
+  el.closest('.mini-chips').querySelectorAll('.mini-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  saveData();
+}
+
+function selectPersonality(id, el) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  host.modules.ai.personality = id;
+  el.closest('.mini-chips').querySelectorAll('.mini-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  saveData();
+}
+
+// ─── AUTOMATIONS ──────────────────────────────────────────────
+function renderAutoList() {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (!host) return;
+  const list = document.getElementById('auto-list');
+  list.innerHTML = Object.entries(host.automations).map(([evt, cfg]) => {
+    const meta = EVENTS_META[evt] || { cls:'', icon:'⚡', label: evt };
+    return `
+      <div class="auto-row">
+        <div class="auto-event">${meta.icon} ${evt}</div>
+        <div class="auto-arrow">→</div>
+        <div class="auto-actions">
+          ${cfg.actions.map(a => `<span class="auto-action">${a}</span>`).join('')}
+        </div>
+        <div class="auto-toggle">
+          <label class="toggle">
+            <input type="checkbox" ${cfg.active ? 'checked' : ''}
+              onchange="toggleAuto('${evt}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAuto(evt, val) {
+  const host = hosts.find(h => h.id === editingHostId);
+  if (host && host.automations[evt]) {
+    host.automations[evt].active = val;
+    saveData();
+  }
+}
+
+// ─── EVENT BUS ────────────────────────────────────────────────
+function fireEvent(type) {
+  const meta = EVENTS_META[type] || { cls:'', icon:'⚡', label: type };
+  const now = new Date();
+  const time = now.toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const targetHost = hosts.length > 0
+    ? hosts[Math.floor(Math.random() * hosts.length)].name
+    : 'Demo Host';
+
+  const entry = { type, meta, time, host: targetHost, ts: now.getTime() };
+  eventLog.unshift(entry);
+  todayEventCount++;
+  saveData();
+  updateStats();
+  renderEventLog();
+  renderAutoResults(type, targetHost);
+  switchPage('events');
+  showToast(`${meta.icon} ${type} — ${targetHost}`);
+}
+
+function renderEventLog() {
+  const log = document.getElementById('event-log');
+  const label = document.getElementById('event-count-label');
+  if (!eventLog.length) {
+    log.innerHTML = `<div class="empty" style="padding:30px 20px;"><div class="empty-icon">📡</div><div>اضغط على أي حدث لمحاكاته</div></div>`;
+    if (label) label.textContent = '0 حدث';
+    return;
+  }
+  if (label) label.textContent = eventLog.length + ' حدث';
+  log.innerHTML = eventLog.map(e => `
+    <div class="event-log-item ${e.meta.cls}">
+      <span class="log-time">${e.time}</span>
+      <span class="log-type">${e.meta.icon} ${e.type}</span>
+      <span class="log-host">← ${e.host}</span>
+      <span class="log-desc" style="color:var(--muted);">${e.meta.label}</span>
+    </div>
+  `).join('');
+}
+
+function clearEventLog() {
+  eventLog = [];
+  todayEventCount = 0;
+  saveData();
+  updateStats();
+  renderEventLog();
+  document.getElementById('auto-results').innerHTML = `
+    <div class="empty">
+      <div class="empty-icon">🔗</div>
+      <div>عند تشغيل حدث ستظهر هنا الأتمتة التي تُفعّل لكل مضيف</div>
+    </div>
+  `;
+}
+
+function renderAutoResults(type, hostName) {
+  const host = hosts.find(h => h.name === hostName) || hosts[0];
+  const container = document.getElementById('auto-results');
+  if (!host) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🏠</div><div>أضف مضيف أول لرؤية الأتمتة</div></div>`;
+    return;
+  }
+
+  const activeHosts = hosts.filter(h => h.status === 'active');
+  container.innerHTML = activeHosts.map(h => {
+    const auto = h.automations[type];
+    if (!auto) return '';
+    const meta = EVENTS_META[type] || { cls:'', icon:'⚡' };
+    return `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="font-size:18px;">${typeIcon(h.type)}</span>
+          <strong>${h.name}</strong>
+          <span style="color:var(--muted);font-size:12px;">${h.location}</span>
+          <span class="tag tag-${h.status}" style="margin-right:auto;">${statusLabel(h.status)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="auto-event">${meta.icon} ${type}</div>
+          <div class="auto-arrow">→</div>
+          ${auto.active
+            ? auto.actions.map(a => `<span class="auto-action">${a}</span>`).join('')
+            : `<span style="color:var(--muted);font-size:12px;">⛔ معطّل لهذا المضيف</span>`
+          }
+        </div>
+        ${type === 'GUEST_ENTERED' && h.modules.sports.enabled ? `
+          <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+            🏆 Sports Module نشط — الدوريات: ${(h.modules.sports.leagues||[]).map(l => LEAGUES.find(x=>x.id===l)?.label||l).join(', ')}
+            ${h.modules.sports.match_day_only ? ' · أيام المباريات فقط' : ''}
+          </div>
+        ` : ''}
+        ${type === 'CHECKIN_STARTED' && h.modules.music.enabled ? `
+          <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+            🎵 Music Module نشط — النوع: ${MUSIC_GENRES.find(g=>g.id===h.modules.music.genre)?.label||h.modules.music.genre}
+            ${h.modules.music.auto_on ? ' · تشغيل تلقائي' : ''}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('') || `<div class="empty"><div class="empty-icon">🏠</div><div>لا يوجد مضيفين نشطين</div></div>`;
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────────────
+function openModal(id) { document.getElementById('modal-' + id).classList.add('show'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ─── TOAST ────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+loadData();
+renderHosts();
+renderEventLog();
+updateStats();
+
+// Seed demo hosts if empty
+if (hosts.length === 0) {
+  const demo1 = makeDefaultHost('فيلا الياسمين', 'الرياض - النزهة', 'villa', 'active', 'أهلاً بك في فيلا الياسمين');
+  demo1.modules.sports.leagues = ['saudi', 'champions'];
+  demo1.modules.music.genre = 'khaliji';
+
+  const demo2 = makeDefaultHost('شقة السلام', 'جدة - الروضة', 'apartment', 'active', 'مرحباً بكم');
+  demo2.modules.sports.enabled = false;
+  demo2.modules.music.genre = 'lounge';
+
+  const demo3 = makeDefaultHost('شاليه النخيل', 'الدمام - الشاطئ', 'chalet', 'inactive', 'أهلاً وسهلاً');
+  demo3.modules.tv.enabled = true;
+  demo3.modules.sports.match_day_only = true;
+  demo3.modules.sports.leagues = ['saudi'];
+
+  hosts.push(demo1, demo2, demo3);
+  saveData();
+  renderHosts();
+  updateStats();
+}
+</script>
+</body>
+</html>
