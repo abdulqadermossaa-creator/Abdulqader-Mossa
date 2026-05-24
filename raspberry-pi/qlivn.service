@@ -1,0 +1,15 @@
+[Unit]
+Description=Qlivn OS — Pi Controller
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/qlivn
+EnvironmentFile=/home/pi/qlivn/.env
+ExecStart=/home/pi/qlivn/venv/bin/python qlivn_controller.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
