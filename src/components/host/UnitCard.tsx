@@ -1,10 +1,6 @@
 'use client'
 
-import type { Host, ModuleConfig } from '@/lib/utils'
 import { getTypeIcon, getTypeLabel, getStatusLabel } from '@/lib/utils'
-
-// Re-export Host type for convenience
-export type { Host }
 
 interface ModuleConfig2 {
   sports?: { enabled: boolean }
