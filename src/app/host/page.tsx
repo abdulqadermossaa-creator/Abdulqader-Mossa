@@ -646,7 +646,7 @@ function Btn({ children, onClick, secondary, danger }: { children: React.ReactNo
 
 function ModuleCard({ icon, title, enabled, onToggle, children }: { icon: string; title: string; enabled: boolean; onToggle: (v: boolean) => void; children?: React.ReactNode }) {
   return (
-    <div style={{ background: 'var(--bg-card)', border: `1px solid ${enabled ? 'rgba(95,184,120,0.4)' : 'var(--border)'}`, borderRadius: 12, padding: 16, background: enabled ? 'rgba(95,184,120,0.04)' : 'var(--bg-card)' } as React.CSSProperties}>
+    <div style={{ background: enabled ? 'rgba(95,184,120,0.04)' : 'var(--bg-card)', border: `1px solid ${enabled ? 'rgba(95,184,120,0.4)' : 'var(--border)'}`, borderRadius: 12, padding: 16 } as React.CSSProperties}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600 }}>
           <span style={{ fontSize: 20 }}>{icon}</span> {title}
